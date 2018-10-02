@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
+using NuGet.Packaging.Licenses;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
@@ -100,6 +101,33 @@ namespace NuGet.Protocol
 
         [JsonProperty(PropertyName = JsonProperties.PrefixReserved)]
         public bool PrefixReserved { get; private set; }
+
+        [JsonProperty(PropertyName = JsonProperties.LicenseExpression)]
+        public string LicenseExpression { get; private set; }
+        [JsonProperty(PropertyName = JsonProperties.LicenseExpressionVersion)]
+        public Version LicenseExpressionVersion { get; private set; }
+
+        [JsonIgnore]
+        public LicenseMetadata LicenseMetadata
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(LicenseExpression))
+                {
+                    return null;
+                }
+                NuGetLicenseExpression parsedExpression = null;
+                if (LicenseExpressionVersion.CompareTo(LicenseMetadata.CurrentVersion) <= 0)
+                {
+                    parsedExpression = NuGetLicenseExpression.Parse(LicenseExpression); // TODO NK - What if this can't be parsed?
+                }
+                return new LicenseMetadata(LicenseType.Expression,
+                    LicenseExpression,
+                    parsedExpression,
+                    LicenseExpressionVersion);
+            }
+        }
+
 
         public Task<IEnumerable<VersionInfo>> GetVersionsAsync() => Task.FromResult<IEnumerable<VersionInfo>>(ParsedVersions);
 

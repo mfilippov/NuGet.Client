@@ -540,6 +540,7 @@ namespace NuGet.PackageManagement.UI
             // show license agreement
             if (licenseMetadata.Any(e => e.RequireLicenseAcceptance))
             {
+                // Here choose the license info shown. Generate a few packages first.
                 var licenseInfoItems = licenseMetadata
                     .Where(p => p.RequireLicenseAcceptance)
                     .Select(e => new PackageLicenseInfo(e.Identity.Id, e.LicenseUrl, e.Authors));

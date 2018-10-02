@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -87,5 +87,13 @@ namespace NuGet.Protocol
 
         // The prefix reservation is not applicable to local packages
         public bool PrefixReserved => false;
+
+        public LicenseMetadata LicenseMetadata
+        {
+            get
+            {
+               return _nuspec.GetLicenseMetadata(); // TODO NK - Check what happens in the failure scenarios. Don't crash VS. Potentially we print the error message from the parsing.
+            }
+        }
     }
 }
