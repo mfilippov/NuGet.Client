@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
+using System.Net;
 using NuGet.ProjectManagement;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
@@ -45,6 +46,15 @@ namespace NuGet.PackageManagement.PowerShellCmdlets
             LogCore(MessageLevel.Warning, string.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_CommandRemoved, "Open-PackagePage"));
         }
 
+        public static Uri GenerateLinkToLicensesService(string licenseExpression)
+        {
+            if (licenseExpression == null)
+            {
+                return null;
+            }
+            return new Uri("https://www.licenses.nuget.org/" + WebUtility.UrlEncode(licenseExpression));
+        }
+
         [SuppressMessage("Microsoft.Design", "CA1031")]
         protected override void ProcessRecordCore()
         {
@@ -74,9 +84,15 @@ namespace NuGet.PackageManagement.PowerShellCmdlets
                 Uri targetUrl = null;
                 if (License.IsPresent)
                 {
-                    // Here generate the link to the page.
-
-                    targetUrl = package.LicenseUrl;
+                    var metadata = package.LicenseMetadata;
+                    if (metadata?.Type == Packaging.LicenseType.Expression)
+                    {
+                        targetUrl = GenerateLinkToLicensesService(metadata.License);
+                    }
+                    else
+                    {
+                        targetUrl = package.LicenseUrl;
+                    }
                 }
                 else if (ReportAbuse.IsPresent)
                 {

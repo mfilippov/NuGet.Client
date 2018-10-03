@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -7,6 +7,7 @@ namespace NuGet.PackageManagement.UI
 {
     public class PackageLicenseInfo
     {
+        // This can be more than just a URL.
         public PackageLicenseInfo(
             string id,
             Uri licenseUrl,
