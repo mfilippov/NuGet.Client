@@ -19,6 +19,9 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
+using NuGet.Packaging;
+using NuGet.Packaging.Licenses;
+using System.Collections.Specialized;
 
 namespace NuGet.PackageManagement.UI
 {
@@ -549,19 +552,85 @@ namespace NuGet.PackageManagement.UI
             return true;
         }
 
+        private IList<IText> GenerateLicenseLinks(LicenseMetadata metadata)
+        {
+            var list = new List<IText>();
+
+            var identifiers = new List<string>();
+            GetLicenseIdentifiers(metadata.LicenseExpression, identifiers);
+            identifiers = identifiers.OrderBy(aux => aux.Length).ToList();
+
+            var delimiters = new List<Tuple<int,int>>();
+
+            foreach (var identifier in identifiers)
+            {
+                var index = metadata.License.IndexOf(identifier);
+                while (index >= 0)
+                {
+                    delimiters.Add(new Tuple<int, int>(index, identifier.Length));
+                    index = metadata.License.IndexOf(identifier, index + 1);
+                }
+            }
+
+            return list;
+        }
+
+        private void GetLicenseIdentifiers(NuGetLicenseExpression expression, IList<string> identifiers)
+        {
+            switch (expression.Type)
+            {
+                case LicenseExpressionType.License:
+                    var license = (NuGetLicense)expression;
+                    identifiers.Add(license.Identifier);
+                    break;
+
+                case LicenseExpressionType.Operator:
+                    var licenseOperator = (LicenseOperator)expression;
+                    switch (licenseOperator.OperatorType)
+                    {
+                        case LicenseOperatorType.LogicalOperator:
+                            var logicalOperator = (LogicalOperator)licenseOperator;
+                            GetLicenseIdentifiers(logicalOperator.Left, identifiers);
+                            GetLicenseIdentifiers(logicalOperator.Right, identifiers);
+                    
+                            break;
+
+                        case LicenseOperatorType.WithOperator:
+                            var withOperator = (WithOperator)licenseOperator;
+                            identifiers.Add(withOperator.License.Identifier);
+                            identifiers.Add(withOperator.Exception.Identifier);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
         private PackageLicenseInfo GeneratePackageLicenseInfo(IPackageSearchMetadata metadata)
         {
             var list = new List<IText>();
-            if (metadata.LicenseMetadata != null)
+            try
             {
-                // TODO NK - Generate a link here.
-                list.Add(new LicenseText("MIT", new Uri("https://spdx.org/licenses/MIT.html")));
-                list.Add(new FreeText(" AND "));
-                list.Add(new LicenseText("Apache-2.0", new Uri("https://spdx.org/licenses/Apache-2.0.html")));
+                if (metadata.LicenseMetadata != null && metadata.LicenseMetadata.Type == Packaging.LicenseType.Expression)
+                {
+                    // TODO NK - Generate a link here.
+                    list.Add(new LicenseText("MIT", new Uri("https://spdx.org/licenses/MIT.html")));
+                    list.Add(new FreeText(" AND "));
+                    list.Add(new LicenseText("Apache-2.0", new Uri("https://spdx.org/licenses/Apache-2.0.html")));
+                }
+                else
+                {
+
+                    list.Add(new LicenseText(Resources.Text_LicenseAcceptance, metadata.LicenseUrl));
+                }
             }
-            else
+            catch
             {
-                list.Add(new LicenseText(Resources.Text_LicenseAcceptance, metadata.LicenseUrl));
+                // Swallow the exceptions. Don't crash VS.
+                // List out the cases that fail it.
             }
 
             return new PackageLicenseInfo(metadata.Identity.Id, list, metadata.Authors);

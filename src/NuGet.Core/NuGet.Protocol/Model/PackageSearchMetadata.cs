@@ -104,6 +104,7 @@ namespace NuGet.Protocol
 
         [JsonProperty(PropertyName = JsonProperties.LicenseExpression)]
         public string LicenseExpression { get; private set; }
+
         [JsonProperty(PropertyName = JsonProperties.LicenseExpressionVersion)]
         public Version LicenseExpressionVersion { get; private set; }
 

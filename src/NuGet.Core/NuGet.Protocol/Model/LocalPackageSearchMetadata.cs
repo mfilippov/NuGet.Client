@@ -18,12 +18,7 @@ namespace NuGet.Protocol
 
         public LocalPackageSearchMetadata(LocalPackageInfo package)
         {
-            if (package == null)
-            {
-                throw new ArgumentNullException(nameof(package));
-            }
-
-            _package = package;
+            _package = package ?? throw new ArgumentNullException(nameof(package));
             _nuspec = package.Nuspec;
         }
 
@@ -88,12 +83,7 @@ namespace NuGet.Protocol
         // The prefix reservation is not applicable to local packages
         public bool PrefixReserved => false;
 
-        public LicenseMetadata LicenseMetadata
-        {
-            get
-            {
-               return _nuspec.GetLicenseMetadata(); // TODO NK - Check what happens in the failure scenarios. Don't crash VS. Potentially we print the error message from the parsing.
-            }
-        }
+        public LicenseMetadata LicenseMetadata => _nuspec.GetLicenseMetadata();
+        // TODO NK - Check what happens in the failure scenarios. Don't crash VS. Potentially we print the error message from the parsing.
     }
 }
