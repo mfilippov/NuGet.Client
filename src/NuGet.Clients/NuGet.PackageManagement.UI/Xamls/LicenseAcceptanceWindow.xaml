@@ -63,7 +63,7 @@
                     <Run
               Text="{Binding Authors, Mode=OneTime}" />
           </TextBlock>
-          <ItemsControl ItemsSource="{Binding License}" Grid.Row="1">
+          <ItemsControl ItemsSource="{Binding License}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <WrapPanel Orientation="Horizontal" />
