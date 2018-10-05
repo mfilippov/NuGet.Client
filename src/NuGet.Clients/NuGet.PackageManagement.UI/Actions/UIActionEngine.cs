@@ -540,10 +540,17 @@ namespace NuGet.PackageManagement.UI
             // show license agreement
             if (licenseMetadata.Any(e => e.RequireLicenseAcceptance))
             {
+                //
+                var list = new List<IText>() {
+                    new LicenseText("MIT", new Uri("https://spdx.org/licenses/MIT.html")) ,
+                    new FreeText(" AND "),
+                    new LicenseText("Apache-2.0", new Uri("https://spdx.org/licenses/Apache-2.0.html"))
+                    };
+
                 // Here choose the license info shown. Generate a few packages first.
                 var licenseInfoItems = licenseMetadata
                     .Where(p => p.RequireLicenseAcceptance)
-                    .Select(e => new PackageLicenseInfo(e.Identity.Id, e.LicenseUrl, e.Authors));
+                    .Select(e => new PackageLicenseInfo(e.Identity.Id, list, e.Authors));
                 return uiService.PromptForLicenseAcceptance(licenseInfoItems);
             }
 

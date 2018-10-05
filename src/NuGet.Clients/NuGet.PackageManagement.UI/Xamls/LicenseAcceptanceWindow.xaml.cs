@@ -1,12 +1,24 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace NuGet.PackageManagement.UI
 {
+    public class Link
+    {
+        public string Text { get; set; }
+        public Uri Uri { get; set; }
+    }
+
+    public class NonLink
+    {
+        public string Text { get; set; }
+    }
+
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
