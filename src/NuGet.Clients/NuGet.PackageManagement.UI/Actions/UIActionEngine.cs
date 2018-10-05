@@ -558,18 +558,19 @@ namespace NuGet.PackageManagement.UI
 
             var identifiers = new List<string>();
             GetLicenseIdentifiers(metadata.LicenseExpression, identifiers);
-            identifiers = identifiers.OrderBy(aux => aux.Length).ToList();
 
-            var delimiters = new List<Tuple<int,int>>();
-
+            var start = 0;
+            var end = 0;
             foreach (var identifier in identifiers)
             {
-                var index = metadata.License.IndexOf(identifier);
-                while (index >= 0)
-                {
-                    delimiters.Add(new Tuple<int, int>(index, identifier.Length));
-                    index = metadata.License.IndexOf(identifier, index + 1);
-                }
+                end = metadata.License.IndexOf(identifier);
+                // create free text.
+                list.Add(new FreeText(metadata.License.Substring(start, end)));
+                start = end;
+                end += identifier.Length;
+                var license = metadata.License.Substring(start, end);
+                list.Add(new LicenseText(license, new Uri($"https://spdx.org/licenses/{license}.html"));
+                start = end; // TODO NK there has to be an off by one error here.
             }
 
             return list;
